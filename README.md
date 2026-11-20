@@ -81,7 +81,7 @@ Power the MAX4466 and TFT from 3.3 V, and connect all grounds together.
 4. Select your ESP32 board and port under **Tools**, then click **Upload**.
 5. Keep the room quiet for 3 seconds while it calibrates.
 
-No MAC addresses need to be entered: units find each other through ESP-NOW broadcast.
+No MAC addresses need to be entered: units find each other through ESP-NOW broadcast. Read the note on broadcast below before using HushNet near other ESP32 projects.
 
 ### Tuning
 
@@ -91,6 +91,19 @@ No MAC addresses need to be entered: units find each other through ESP-NOW broad
 | `ALARM_ON_LEVEL` / `ALARM_OFF_LEVEL` | 75 / 55 | Alarm thresholds in % |
 | `ALARM_ON_TIME` / `ALARM_OFF_TIME` | 2000 / 2000 ms | How long noise must stay past a threshold |
 | `SEND_INTERVAL_MS` | 500 ms | How often readings are broadcast |
+
+---
+
+## Known Limitations
+
+> [!WARNING]
+> **HushNet uses ESP-NOW broadcast.** Every unit sends its readings to all ESP-NOW devices in range on the same Wi-Fi channel, not only to other HushNet units.
+
+- **Other ESP32 projects nearby may receive HushNet's packets.** If another ESP-NOW device in the area is listening for broadcast messages, it will receive HushNet's packets every 500 ms and may misread them as its own data.
+- **HushNet may misread other devices' packets.** Incoming messages are only checked by size, so any other ESP-NOW packet of the same length would be shown as a remote reading.
+- **Recommended for shared spaces** (labs, classrooms, demos with other ESP32 projects):
+  - Switch to **unicast**: replace `broadcastAddress` with each partner unit's MAC address (printed to Serial Monitor at startup as `Local MAC`), and add one peer per unit.
+  - Or add a **group check**: include a fixed identifier in `esp_msg_t` and ignore any message that doesn't carry it.
 
 ---
 
